@@ -24,7 +24,7 @@ object Coevo extends App {
     valueSystems(1)
   )
 
-  val numberOfRounds = 100
+  val numberOfRounds = 10
 
   simulation.display(
     simulation.run(77, 1, 3, 1, 0.5, 0.9, 0, 0.02, agentValueSystems, numberOfRounds)
@@ -130,7 +130,7 @@ object simulation {
     } zip signals)
     else {
       agents.map { a =>
-        agent.choose(round, a, memoryLength, institution, random)
+        agent.choose(round, a, institution, agents.length, random)
       }.unzip
     }
   }

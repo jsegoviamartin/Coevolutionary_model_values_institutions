@@ -41,24 +41,24 @@ object agent {
     )
   }
 
-  def withB(agent: Agent, nbShown: Int, nbObserved: Int, round: Round, idx: Int) = {
+  def withB(agent: Agent, nbShown: Int, nbObserved: Int, round: Round, idx: Int, nbAgents: Int) = {
     val coordinationBiasComplement = 1.0 - agent.coordinationBias
     if (!((nbShown == nbObserved) && (nbShown == 0))) {
       val weightedAgentBiasComplement = 0.98 * (1.0 - agent.contentBias)
 
       (weightedAgentBiasComplement * coordinationBiasComplement * nbShown / round) +
         (weightedAgentBiasComplement * agent.coordinationBias * nbObserved / round) +
-        (0.98 * agent.contentBias * agent.valueSystem(idx)) + (agent.mutation / 8)
+        (0.98 * agent.contentBias * agent.valueSystem(idx)) + (agent.mutation / nbAgents)
     } else {
       (0.98 * coordinationBiasComplement * nbShown / round) +
         (0.98 * agent.coordinationBias * nbObserved / round) +
-        (agent.mutation / 8)
+        (agent.mutation / nbAgents)
     }
   }
 
-  def choose(round: Round, agent: Agent, memoryLength: Int, institution: Institution, random: Random) = {
+  def choose(round: Round, agent: Agent, institution: Institution, nbAgents: Int, random: Random) = {
     val probs = agent.signals.zipWithIndex.map { case (signal, index) =>
-      (signal, withB(agent, agent.memoryShown.getOrElse(signal, 0), agent.memoryObserved.getOrElse(signal, 0), round, index))
+      (signal, withB(agent, agent.memoryShown.getOrElse(signal, 0), agent.memoryObserved.getOrElse(signal, 0), round, index, nbAgents))
     }
 
     val elecc = Utils.multinomial(probs, random)
