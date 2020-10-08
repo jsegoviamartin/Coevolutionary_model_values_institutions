@@ -1,9 +1,7 @@
-## Prerequisite
-
+# Prerequisite
 - [sbt](https://www.scala-sbt.or)
 - [Java 11+](https://openjdk.java.net/)
 
-## Run
-
+# Run
 > sbt
 sbt> run
