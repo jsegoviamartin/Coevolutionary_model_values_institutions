@@ -2,6 +2,8 @@ package coevo
 
 import Types._
 import Utils._
+
+import scala.annotation.tailrec
 import scala.util.Random
 
 object Coevo extends App {
@@ -58,14 +60,15 @@ object simulation {
 
     val rounds = group(agents, random, numberOfRounds)
 
-    play(agents, rounds, memoryLength, signals, numberOfRounds, random)
+    play(agents, rounds, memoryLength, signals, random)
   }
 
 
   case class Simulation(agents: Array[agent.Agent], institution: Institution, memory: Map[Round, Array[SignalSelection]], institutionHistory: Array[Institution])
 
-  def play(agents: Array[agent.Agent], rounds: Seq[Seq[Pair]], memoryLenght: Int, signals: Array[Signal], numberOfRounds: Int, random: Random) = {
+  def play(agents: Array[agent.Agent], rounds: Seq[Seq[Pair]], memoryLenght: Int, signals: Array[Signal], random: Random) = {
 
+    @tailrec
     def playRound(pairs: Seq[Pair], agents: Array[agent.Agent], signalSelections: Array[SignalSelection]): Array[agent.Agent] = {
       if (pairs.isEmpty) agents
       else {
@@ -77,14 +80,14 @@ object simulation {
         val agent1 = agents(agentID1)
         val agent2 = agents(agentID2)
         val newAgents = agents
-          .updated(agentID1, agent.evolve(agent1, signalSelectionForAgent1, signalSelectionForAgent2, memoryLenght))
-          .updated(agentID2, agent.evolve(agent2, signalSelectionForAgent2, signalSelectionForAgent1, memoryLenght))
+          .updated(agentID1, agent.recall(agent1, signalSelectionForAgent1, signalSelectionForAgent2, memoryLenght))
+          .updated(agentID2, agent.recall(agent2, signalSelectionForAgent2, signalSelectionForAgent1, memoryLenght))
 
         playRound(pairs.tail, newAgents, signalSelections)
       }
     }
 
-
+    @tailrec
     def play0(round: Round, rounds: Seq[Seq[Pair]], simulation: Simulation): Simulation = {
       if (rounds.isEmpty) {
         simulation
