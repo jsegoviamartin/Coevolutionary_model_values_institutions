@@ -1,4 +1,4 @@
-package coveo
+package coevo
 
 import Types._
 import Utils._
@@ -19,15 +19,7 @@ object agent {
            ) =
     Agent(id, signals, Map[Signal, Int](), Map[Signal, Int](), Array[Signal](), Array[Signal](), valueSystem, contentBias, coordinationBias, conformityBias, confirmationBias, mutation, iPower)
 
-  case class Agent(id: AgentID, signals: Array[Signal], memoryShown: Map[Signal, Int], memoryObserved: Map[Signal, Int], lastShown: Array[Signal], lastObserved: Array[Signal], valueSystem: ValueSystem, contentBias: Double, coordinationBias: Double, conformityBias: Double, confirmationBias: Double, mutation: Double, iPower: Double) {
-    override def toString = {
-      s"""
-      ID $id
-      SIGNAL ${signals.mkString(",")}
-      VALUE SYSTEM ${valueSystem.mkString(", ")}
-      """
-    }
-  }
+  case class Agent(id: AgentID, signals: Array[Signal], memoryShown: Map[Signal, Int], memoryObserved: Map[Signal, Int], lastShown: Array[Signal], lastObserved: Array[Signal], valueSystem: ValueSystem, contentBias: Double, coordinationBias: Double, conformityBias: Double, confirmationBias: Double, mutation: Double, iPower: Double)
 
   def evolve(agent: Agent, vShown: Signal, vObserved: Signal, memoryLength: Int) = {
     val lastShown = agent.lastShown.takeRight(memoryLength - 1).appended(vShown)

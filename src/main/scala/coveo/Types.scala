@@ -1,4 +1,4 @@
-package coveo
+package coevo
 
 object Types {
 
@@ -10,7 +10,6 @@ object Types {
   type ValueSystem = Array[Double]
   type Pair = Seq[AgentID]
   type SignalSelection = (AgentID, Signal)
-  //type Round = Seq[Pair]
   type Round= Int
   type Institution= Array[Double]
   type SignalMemory = Map[Signal, Int]
