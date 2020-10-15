@@ -26,12 +26,20 @@ object Coevo extends App {
     valueSystems(1)
   )
 
-  val numberOfRounds = 100
+  val grouping = Seq(
+    Seq(Seq(0, 1), Seq(2, 3), Seq(4, 5), Seq(6, 7)),
+    Seq(Seq(0, 3), Seq(2, 1), Seq(4, 7), Seq(6, 5)),
+    Seq(Seq(0, 6), Seq(2, 7), Seq(4, 1), Seq(6, 3)),
+    Seq(Seq(0, 7), Seq(2, 5), Seq(4, 3), Seq(6, 1)),
+    Seq(Seq(0, 2), Seq(1, 3), Seq(4, 6), Seq(5, 7)),
+    Seq(Seq(0, 4), Seq(1, 5), Seq(2, 6), Seq(3, 7)),
+    Seq(Seq(0, 6), Seq(1, 7), Seq(2, 4), Seq(3, 5))
+  )
 
-  val results = simulation.run(99, 1, 3, 1, 0.0, 0.9, 0, 0.02, agentValueSystems, numberOfRounds)
+  val results = simulation.run(9, 1, 3, 1, 0.5, 1, 0, 0.02, agentValueSystems, Left(grouping))
 
-  simulation.entropiesPerRound(results).zipWithIndex.foreach{ epr=>
-    println(s"R ${epr._2}: ${epr._1}" )
+  simulation.entropiesPerRound(results).zipWithIndex.foreach { epr =>
+    println(s"R ${epr._2}: ${epr._1}")
   }
 }
 
@@ -46,7 +54,7 @@ object simulation {
           confirm: Double,
           mutation: Double,
           agentValueSystems: Array[ValueSystem],
-          numberOfRounds: Int
+          grouping: Either[Seq[Seq[Pair]], Round]
          ) = {
     val random = new Random(seed)
 
@@ -58,15 +66,18 @@ object simulation {
       agent.build(i, signals, agentValueSystems(i), cont, coord, conform, confirm, mutation, iPower)
     }
 
-    val rounds = group(agents, random, numberOfRounds)
+    val (rounds, fixedGrouping) = grouping match {
+      case Left(pairing) => (pairing, true)
+      case Right(numberOfRounds) => (group(agents, random, numberOfRounds), false)
+    }
 
-    play(agents, rounds, memoryLength, signals, random)
+    play(agents, rounds, fixedGrouping, memoryLength, signals, random)
   }
 
 
   case class Simulation(agents: Array[agent.Agent], institution: Institution, memory: Map[Round, Array[SignalSelection]], institutionHistory: Array[Institution])
 
-  def play(agents: Array[agent.Agent], rounds: Seq[Seq[Pair]], memoryLenght: Int, signals: Array[Signal], random: Random) = {
+  def play(agents: Array[agent.Agent], rounds: Seq[Seq[Pair]], fixedGrouping: Boolean, memoryLenght: Int, signals: Array[Signal], random: Random) = {
 
     @tailrec
     def playRound(pairs: Seq[Pair], agents: Array[agent.Agent], signalSelections: Array[SignalSelection]): Array[agent.Agent] = {
@@ -93,7 +104,7 @@ object simulation {
         simulation
       }
       else {
-        val (newAgentsFromSignals, signalSelection) = produceSignals(round, simulation.agents, memoryLenght, signals, simulation.institution, random)
+        val (newAgentsFromSignals, signalSelection) = produceSignals(round, simulation.agents, signals, simulation.institution, fixedGrouping, random)
         val newAgents = playRound(rounds.head, newAgentsFromSignals, signalSelection)
         val newInstitution = institutions(newAgents.map {
           _.valueSystem
@@ -133,10 +144,17 @@ object simulation {
     valueSystems.transpose.map { vs => vs.mean }
   }
 
-  def produceSignals(round: Round, agents: Array[agent.Agent], memoryLength: Int, signals: Array[Signal], institution: Institution, random: Random): (Array[agent.Agent], Array[SignalSelection]) = {
-    if (round == 1) (agents, agents.map {
-      _.id
-    } zip uniform(signals, 10, random))
+  def produceSignals(round: Round, agents: Array[agent.Agent], signals: Array[Signal], institution: Institution, fixedGrouping: Boolean, random: Random): (Array[agent.Agent], Array[SignalSelection]) = {
+   if (round == 1) {
+      val zipWith = {
+        if (fixedGrouping) signals.toSeq
+        else uniform(signals, 10, random)
+      }
+
+      (agents, agents.map {
+        _.id
+      } zip zipWith)
+    }
     else {
       agents.map { a =>
         agent.choose(round, a, institution, agents.length, random)
