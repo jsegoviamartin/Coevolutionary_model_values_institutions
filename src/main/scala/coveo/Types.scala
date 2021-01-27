@@ -6,6 +6,15 @@ object Types {
     override def toString = s"S$id"
   }
 
+  trait InstitutionType
+  object MeanInstitution extends InstitutionType
+  object MajorityInstitution extends InstitutionType
+  object Relative extends InstitutionType
+
+  trait SignalAssignment
+  object Replacement extends SignalAssignment
+  object NoReplacement extends SignalAssignment
+
   type AgentID = Int
   type ValueSystem = Array[Double]
   type Pair = Seq[AgentID]

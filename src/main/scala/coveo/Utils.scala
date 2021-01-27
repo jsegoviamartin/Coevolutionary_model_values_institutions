@@ -1,6 +1,7 @@
 package coevo
 
-import scala.util.Random
+//import scala.util.Random
+import org.apache.commons.math3.random._
 
 object Utils {
 
@@ -14,7 +15,7 @@ object Utils {
   }
 
 
-  def multinomial[T](values: Array[(T, Double)], random: Random): T = {
+  def multinomial[T](values: Array[(T, Double)], random: RandomGenerator): T = {
     var sum = 0.0
     var previousSum = 0.0
     val cdf = Array.ofDim[Double](values.length + 1)
@@ -35,10 +36,10 @@ object Utils {
     values(drawnIndex.insertionPoint - 1)._1
   }
 
-  def uniform[T](values: Array[T], size: Int, random: Random) = {
-    val maxBound = values.size - 1
+  def uniform[T](values: Array[T], size: Int, random: RandomGenerator) = {
+    val maxBound = values.size
     (1 to size).map { i =>
-      values(random.between(0, maxBound))
+      values(random.nextInt(maxBound))
     }
   }
 

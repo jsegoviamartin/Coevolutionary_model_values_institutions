@@ -2,7 +2,7 @@ package coevo
 
 import Types._
 import Utils._
-import scala.util.Random
+import org.apache.commons.math3.random._
 
 
 object agent {
@@ -48,11 +48,12 @@ object agent {
     }
   }
 
-  def choose(round: Round, agent: Agent, institution: Institution, nbAgents: Int, random: Random) = {
+  def choose(round: Round, agent: Agent, institution: Institution, nbAgents: Int, random: RandomGenerator) = {
     val probs = agent.signals.zipWithIndex.map { case (signal, index) =>
       (signal, withB(agent, agent.memoryShown.getOrElse(signal, 0), agent.memoryObserved.getOrElse(signal, 0), round, index, nbAgents))
     }
 
+  //  println( agent.id + " PROBS  " + probs.toSeq)
     val elecc = Utils.multinomial(probs, random)
 
     val aux: Array[Int] = agent.signals.map { s => if (s == elecc) 1 else 0 }
